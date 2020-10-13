@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   respond_to :json, :html
 
   before_action :authenticate_user
+  before_action :configure_permitted_parameters, if: :devise_controller?
 
   def authenticate_user!(options = {})
     head :unauthorized unless signed_in?
@@ -17,6 +18,12 @@ class ApplicationController < ActionController::Base
   def signed_in?
     @current_user_id.present?
   end
+
+  protected
+
+    def configure_permitted_parameters
+      devise_parameter_sanitizer.permit(:sign_up, keys: [:email, :password, :first_name, :last_name, :client_name, :phone, :address1, :address2, :country, :state, :zip_code, :varification_code, :varification_id, stl_files: []])
+    end
 
   private
 
@@ -33,6 +40,8 @@ class ApplicationController < ActionController::Base
   #     end
   #   end
   # end
+    
+
 
     def authenticate_user
       if request.headers['Authorization'].present?

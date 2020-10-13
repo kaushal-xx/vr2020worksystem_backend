@@ -7,7 +7,16 @@ Rails.application.routes.draw do
     devise_for :users, controllers: { sessions: :sessions },
                        path_names: { sign_in: :login }
 
-    resource :user, only: [:show, :update, :edit, :new]
+    resources :users do 
+      collection do 
+        post :add_designer
+        get :get_designer
+        get :list
+        post :send_varification_code
+        post :need_support
+      end
+    end
+    resources :orders
   end
   devise_for :admins, path_names: { sign_in: 'login', sign_out: 'logout', sign_up: 'signup' }
 

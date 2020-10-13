@@ -36,10 +36,18 @@ gem 'jwt'
 gem "simple_token_authentication"
 gem 'aws-sdk'
 gem 'rack-cors'
+gem 'kaminari'
+gem 'sidekiq'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem 'capistrano', '~> 3.10', '>= 3.10.1'
+  gem 'capistrano3-puma'
+  gem 'capistrano-rails', require: false
+  gem 'capistrano-bundler', require: false
+  gem 'capistrano-rvm'
+  gem 'capistrano-sidekiq'
 end
 
 group :development do

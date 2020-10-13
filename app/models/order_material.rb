@@ -1,0 +1,2 @@
+class OrderMaterial < ApplicationRecord
+end
