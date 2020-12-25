@@ -3,11 +3,14 @@ class OrdersController < ApplicationController
 
   def index
     page = params[:page]||1
+    search_params = {}
     if params[:status].present?
-      @orders = current_user.role == 'user' ? current_user.orders.where(status: params[:status]).page(page).per(15) : Order.where(status: params[:status]).page(page).per(15)
-    else
-      @orders = current_user.role == 'user' ? current_user.orders.page(page).per(15) : Order.all.page(page).per(15)
+      search_params[:status] = params[:status]
     end
+    if params[:order_id].present?
+      search_params[:id] = params[:order_id]
+    end
+    @orders = current_user.role == 'user' ? current_user.orders.where(search_params).page(page).per(15) : Order.where(status: search_params).page(page).per(15)
   end
 
  def create
@@ -73,6 +76,7 @@ class OrdersController < ApplicationController
       :document,
       :stl_file,
       :tooth_no,
+      :message,
       order_materials_attributes:[:id, :_destroy, :unit, :tooth_material, :design_type, :tooth_no])
   end
 end
