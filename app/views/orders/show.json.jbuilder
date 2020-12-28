@@ -6,4 +6,7 @@ json.order do |json|
 	json.order_materials @order.order_materials do |order_material|
 		json.(order_material, :id, :unit, :tooth_material, :design_type, :tooth_no)
 	end
+	json.order_history @order.order_histories do |order_history|
+		json.partial! 'orders/order_history', order_history: order_history
+	end
 end

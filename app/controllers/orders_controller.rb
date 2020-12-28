@@ -16,6 +16,7 @@ class OrdersController < ApplicationController
  def create
   @order = current_user.orders.new(order_params)
   if @order.save
+    OrderHistory.create_obj(@order.id, {}, @order.attributes)
     render :show
   else
     render json: { errors: @order.errors }, status: :unprocessable_entity
@@ -35,7 +36,9 @@ class OrdersController < ApplicationController
   else
     @order = Order.find(params[:id])
   end
+  old_attributes = @order.attributes
   if @order.update(order_params)
+    OrderHistory.create_obj(@order.id, old_attributes, @order.attributes)
     render :show
   else
     render json: { errors: @order.errors }, status: :unprocessable_entity
