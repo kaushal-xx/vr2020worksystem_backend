@@ -6,6 +6,9 @@ json.orders @orders do |order|
 	json.user do
 		json.partial! 'users/min_user', user: order.user
 	end
+	json.order_history order.order_histories do |order_history|
+		json.partial! 'orders/order_history', order_history: order_history
+	end
 end
 
 json.pagination do

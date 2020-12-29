@@ -79,6 +79,7 @@ class OrdersController < ApplicationController
       :document,
       :stl_file,
       :tooth_no,
+      :com_message,
       order_materials_attributes:[:id, :_destroy, :unit, :tooth_material, :design_type, :tooth_no])
   end
 end

@@ -13,5 +13,6 @@ json.(order, :id,
 			 :stl_file_url,
 			 :tooth_no,
 			 :status,
+			 :com_message,
 			 :updated_at,
 			 :created_at)
