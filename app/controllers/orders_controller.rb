@@ -4,13 +4,17 @@ class OrdersController < ApplicationController
   def index
     page = params[:page]||1
     search_params = {}
+    lab = nil
     if params[:status].present?
       search_params[:status] = params[:status]
+    end
+    if params[:lab].present?
+      lab = params[:lab]
     end
     if params[:order_id].present?
       search_params[:id] = params[:order_id]
     end
-    @orders = current_user.role == 'user' ? current_user.orders.where(search_params).page(page).per(15) : Order.where(search_params).page(page).per(15)
+    @orders = current_user.role == 'user' ? current_user.orders.where(search_params).page(page).per(15) : lab.present? ? User.find(lab).orders.where(search_params).page(page).per(15)  :  Order.where(search_params).page(page).per(15)
   end
 
  def create
