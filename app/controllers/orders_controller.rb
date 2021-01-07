@@ -2,15 +2,11 @@ class OrdersController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    page = params[:page]||1
-    search_params = {}
-    if params[:status].present?
-      search_params[:status] = params[:status]
-    end
-    if params[:order_id].present?
-      search_params[:id] = params[:order_id]
-    end
-    @orders = current_user.role == 'user' ? current_user.orders.where(search_params).page(page).per(15) : Order.where(search_params).page(page).per(15)
+    @orders = Order.search(current_user, params)
+  end
+
+  def status_count
+    render json: Order.group(:status).count
   end
 
  def create
@@ -59,6 +55,69 @@ class OrdersController < ApplicationController
     end
   else
     render json: { errors: "Order is not found" }, status: :unprocessable_entity
+  end
+ end
+
+ def invite
+  @order = Order.find_by_id params[:id]
+  user = User.find_by_id params[:designer_id]
+  if @order.blank? || user.blank?
+    render json: { errors: "Order/User is not found" }, status: :unprocessable_entity
+  else
+    if @order.invites.present?
+      render json: { errors: "Order invite already present" }, status: :unprocessable_entity
+    else
+      @order.invites.create(user_id: user.id)
+      render :show
+    end
+  end
+ end
+
+ def update_invite
+  invite = Invite.find_by_id params[:invite_id]
+  if invite.blank?
+    render json: { errors: "Invite is not found" }, status: :unprocessable_entity
+  else
+    invite.order_id = params[:order_id] if params[:order_id].present?
+    invite.user_id = params[:user_id] if params[:user_id].present?
+    if invite.save
+      @order = invite.order
+      render :show
+    else
+      render json: { errors: "invite is not save" }, status: :unprocessable_entity
+    end
+  end
+ end
+
+ def delete_invite
+  invite = Invite.find_by_id params[:invite_id]
+  if invite.blank?
+    render json: { errors: "Invite is not found" }, status: :unprocessable_entity
+  else
+    if invite.destroy
+      render json: { message: 'Invite was successfully destroyed.' }
+    else
+      render json: { errors: invite.errors }, status: :unprocessable_entity
+    end
+  end
+ end
+
+ def assing_orders
+  @orders = Order.where(id: params[:ids])
+  user = User.find_by_id params[:designer_id]
+  skip_orders = []
+  @orders.each do |order|
+    invite = order.invites.first
+    if invite.blank?
+      order.invites.create(user_id: user.id)
+    elsif invite.user_id != user.id
+      skip_orders << order
+    end
+  end
+  if skip_orders.blank?
+    render json: { message: 'All Order were assigned successfully.' }
+  else
+    render json: { errors: 'Some order already assigned to different user',  skip_orders: skip_orders.map(&:id) }
   end
  end
 

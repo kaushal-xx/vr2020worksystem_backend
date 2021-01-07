@@ -12,6 +12,7 @@ class User < ApplicationRecord
   # serialize :documents, JSON # If you use SQLite, add this line.
   has_many_attached :documents
   has_many :orders
+  has_many :invites
 
   acts_as_token_authenticatable
 
@@ -44,5 +45,9 @@ class User < ApplicationRecord
         errors.add(:varification_code, "is not valid") 
       end
     end
+  end
+
+  def invite_orders
+    invites.map(&:order)
   end
 end

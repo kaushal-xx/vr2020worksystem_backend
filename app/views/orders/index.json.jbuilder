@@ -9,6 +9,10 @@ json.orders @orders do |order|
 	json.order_history order.order_histories do |order_history|
 		json.partial! 'orders/order_history', order_history: order_history
 	end
+	json.order_invite order.invites do |invite|
+		json.invite_id invite.id
+		json.partial! 'users/min_user', user: invite.user
+	end
 end
 
 json.pagination do

@@ -16,7 +16,17 @@ Rails.application.routes.draw do
         post :need_support
       end
     end
-    resources :orders
+    resources :orders do
+      collection do
+        post :update_invite
+        post :delete_invite
+        post :assing_orders
+        get :status_count
+      end
+      member do
+        post :invite
+      end
+    end
   end
   devise_for :admins, path_names: { sign_in: 'login', sign_out: 'logout', sign_up: 'signup' }
 
