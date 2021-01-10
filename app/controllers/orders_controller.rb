@@ -6,7 +6,12 @@ class OrdersController < ApplicationController
   end
 
   def status_count
-    render json: Order.group(:status).count
+    orders = if current_user.role == 'user'
+      current_user.orders.group(:status).count
+    else
+      Order.group(:status).count
+    end
+    render json: orders
   end
 
  def create
@@ -64,12 +69,13 @@ class OrdersController < ApplicationController
   if @order.blank? || user.blank?
     render json: { errors: "Order/User is not found" }, status: :unprocessable_entity
   else
-    if @order.invites.present?
-      render json: { errors: "Order invite already present" }, status: :unprocessable_entity
-    else
+    invite = @order.invites.first
+    if invite.blank?
       @order.invites.create(user_id: user.id)
-      render :show
+    else
+      invite.update(user_id: user.id)
     end
+    render :show
   end
  end
 
@@ -105,20 +111,15 @@ class OrdersController < ApplicationController
  def assing_orders
   @orders = Order.where(id: params[:ids])
   user = User.find_by_id params[:designer_id]
-  skip_orders = []
   @orders.each do |order|
     invite = order.invites.first
     if invite.blank?
       order.invites.create(user_id: user.id)
-    elsif invite.user_id != user.id
-      skip_orders << order
+    else
+      invite.update(user_id: user.id)
     end
   end
-  if skip_orders.blank?
-    render json: { message: 'All Order were assigned successfully.' }
-  else
-    render json: { errors: 'Some order already assigned to different user',  skip_orders: skip_orders.map(&:id) }
-  end
+  render json: { message: 'All Order were assigned successfully.' }
  end
 
   private

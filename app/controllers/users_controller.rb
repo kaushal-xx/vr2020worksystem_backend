@@ -10,6 +10,8 @@ class UsersController < ApplicationController
       else
         @users = User.all.page(page).per(15)
       end
+    elsif current_user.role == 'designer'
+      render json: { user_ids: User.all.pluck(:id) }, status: :ok
     end
   end
 
@@ -25,7 +27,6 @@ class UsersController < ApplicationController
   end
 
   def need_support
-    user_info = params[:user_info]
     UserMailer.send_need_support(params[:user_info], params[:contant]).deliver
     render json: { message: "Send Support Email" }, status: :ok
   end
