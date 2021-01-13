@@ -20,17 +20,15 @@ class Order < ApplicationRecord
     page = params[:page]||1
     search_params = []
     search_status = {status: params[:status]} if params[:status].present?
-    search_params << "DATE(created_at) >= #{params[:min_date]}" if params[:min_date].present?
-    search_params << "DATE(created_at) <= #{params[:max_date]}" if params[:max_date].present?
-    search_params << "id = #{params[:order_id]}" if params[:order_id].present?
-    search_params << "document = #{params[:document_url]}" if params[:document_url].present?
-    search_params << "user_id = #{params[:lab]}" if params[:lab].present? && current_user.role != 'user'
-    search_params = search_params.join(' and ')
-    if current_user.role == 'user'
-    	current_user.orders.where(search_params).where(search_status).order(self.order_by_case).page(page).per(15)
-    else
-    	Order.where(search_params).where(search_status).order(self.order_by_case).page(page).per(15)
-    end
+    orders = Order.where(search_status)
+    orders = orders.where("DATE(orders.created_at) >= ?", params[:min_date]) if params[:min_date].present?
+    orders = orders.where("DATE(orders.created_at) <= ?", params[:max_date]) if params[:max_date].present?
+    orders = orders.where("orders.id = ?", params[:order_id]) if params[:order_id].present?
+    orders = orders.where("orders.document like ?", "%"+params[:document_url]) if params[:document_url].present?
+    orders = orders.where("orders.user_id = ?", params[:lab]) if params[:lab].present? && current_user.role != 'user'
+    orders = orders.where("orders.user_id = ?", current_user.id) if current_user.role == 'user'
+    orders = orders.joins(:invites).where(invites: {user_id: params[:assignee_id]}) if params[:assignee_id].present?
+    orders.order(self.order_by_case).page(page).per(15)
   end
 
   def invite_users

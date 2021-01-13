@@ -11,7 +11,7 @@ class UsersController < ApplicationController
         @users = User.all.page(page).per(15)
       end
     elsif current_user.role == 'designer'
-      render json: { user_ids: User.all.pluck(:id) }, status: :ok
+      render json: { user_ids: User.where(role: 'user').pluck(:id) }, status: :ok
     end
   end
 
