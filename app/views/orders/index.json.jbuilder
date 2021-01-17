@@ -18,3 +18,7 @@ end
 json.pagination do
   json.total_page @orders.try(:total_pages) if @orders.present?
 end
+
+json.status_count do 
+  json.count @order_status_counts if @order_status_counts.present?
+end

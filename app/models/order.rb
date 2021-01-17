@@ -28,7 +28,7 @@ class Order < ApplicationRecord
     orders = orders.where("orders.user_id = ?", params[:lab]) if params[:lab].present? && current_user.role != 'user'
     orders = orders.where("orders.user_id = ?", current_user.id) if current_user.role == 'user'
     orders = orders.joins(:invites).where(invites: {user_id: params[:assignee_id]}) if params[:assignee_id].present?
-    orders.order(self.order_by_case).page(page).per(15)
+    [orders.order(self.order_by_case).page(page).per(15), orders.group(:status).count]
   end
 
   def invite_users

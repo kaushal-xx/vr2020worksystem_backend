@@ -2,15 +2,17 @@ class OrdersController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @orders = Order.search(current_user, params)
+    @orders, @order_status_counts = Order.search(current_user, params)
   end
 
   def status_count
-    orders = if current_user.role == 'user'
-      current_user.orders.group(:status).count
-    else
-      Order.group(:status).count
+    search_params = []
+    if current_user.role == 'user'
+      search_params << "user_id = #{current_user.id}"
     end
+    search_params << "DATE(orders.created_at) >= #{params[:min_date]}" if params[:min_date].present?
+    search_params << "DATE(orders.created_at) <= #{params[:max_date]}" if params[:max_date].present?
+    orders = Order.where(search_params.join(' and ')).group(:status).count
     render json: orders
   end
 
