@@ -22,6 +22,7 @@ Rails.application.routes.draw do
         post :delete_invite
         post :assing_orders
         get :status_count
+        get :user_vise_count
       end
       member do
         post :invite

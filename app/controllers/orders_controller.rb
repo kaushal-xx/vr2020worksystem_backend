@@ -16,6 +16,25 @@ class OrdersController < ApplicationController
     render json: orders
   end
 
+
+  def user_vise_count
+    search_params = []
+    search_params << "DATE(orders.created_at) >= #{params[:min_date]}" if params[:min_date].present?
+    search_params << "DATE(orders.created_at) <= #{params[:max_date]}" if params[:max_date].present?
+    @user_data = []
+    @designer_data = []
+    if current_user.role.downcase == 'admin'
+      User.all.each do |user|
+        if user.role.downcase == 'user'
+          @user_data << {user: user, orders: user.orders.where(search_params.join(' and ')).group(:status).count}
+        elsif user.role.downcase == 'designer'
+          order_ids = user.invites.map(&:order_id)
+          @designer_data << {user: user, orders: Order.where(search_params.join(' and ')).where(id: order_ids).group(:status).count}
+        end
+      end
+    end
+  end
+
  def create
   @order = current_user.orders.new(order_params)
   if @order.save
