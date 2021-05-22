@@ -23,3 +23,13 @@ Things you may want to cover:
 
 * ...
 # vr2020worksystem_backend
+
+
+#Running server on local 
+
+Deploy on staging
+
+Staging
+ssh ubuntu@3.142.14.125
+cap staging deploy 
+cap staging puma:restart
