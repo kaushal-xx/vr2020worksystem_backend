@@ -20,12 +20,14 @@ class Order < ApplicationRecord
     page = params[:page]||1
     search_params = []
     search_status = {status: params[:status]} if params[:status].present?
+    search_labs = { user_id: params[:lab]}  if params[:lab].present?
     orders = Order.where(search_status)
     orders = orders.where("DATE(orders.created_at) >= ?", params[:min_date]) if params[:min_date].present?
     orders = orders.where("DATE(orders.created_at) <= ?", params[:max_date]) if params[:max_date].present?
     orders = orders.where("orders.id = ?", params[:order_id]) if params[:order_id].present?
     orders = orders.where("orders.document like ?", "%"+params[:document_url]) if params[:document_url].present?
-    orders = orders.where("orders.user_id = ?", params[:lab]) if params[:lab].present? && current_user.role != 'user'
+    # orders = orders.where("orders.user_id = ?", params[:lab]) if params[:lab].present? && current_user.role != 'user'
+    orders = orders.where(search_labs) if params[:lab].present? && current_user.role != 'user'
     orders = orders.where("orders.user_id = ?", current_user.id) if current_user.role == 'user'
     orders = orders.joins(:invites).where(invites: {user_id: params[:assignee_id]}) if params[:assignee_id].present?
     [orders.order(self.order_by_case).order(:id).page(page).per(15), orders.group(:status).count]
