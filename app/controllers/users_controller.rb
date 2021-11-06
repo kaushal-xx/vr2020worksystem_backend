@@ -4,11 +4,14 @@ class UsersController < ApplicationController
 
   def index
     page = params[:page]||1
+    
     if current_user.role == 'admin'
       if params[:role].present?
-        @users = User.where(role: params[:role]).page(page).per(15)
+        perpage = params[:perpage]|| User.where(role: params[:role]).count
+        @users = User.where(role: params[:role]).page(page).per(perpage)
       else
-        @users = User.all.page(page).per(15)
+        perpage = params[:perpage]|| User.count
+        @users = User.all.page(page).per(perpage)
       end
     elsif current_user.role == 'designer'
       render json: { user_ids: User.where(role: 'user').pluck(:id) }, status: :ok
