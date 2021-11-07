@@ -33,3 +33,6 @@ Staging
 ssh ubuntu@3.142.14.125
 cap staging deploy 
 cap staging puma:restart
+
+#run ruby app 
+
